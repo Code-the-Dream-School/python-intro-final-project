@@ -83,13 +83,16 @@ def search_currencies(countries, currency):
 
     return currencies_countries
 
-#matplotlib function
-def create_population_chart(countries):
-
+#Find the 10 countries with largest populations
+def get_top_10_population(countries):
     sorted_countries = sorted(countries, key=lambda country: country["population"], reverse=True)
 
     top_10_countries = sorted_countries[:10]
+    return top_10_countries
 
+
+#matplotlib function
+def create_population_chart(top_10_countries):
     country_names = []
     populations = []
 
@@ -103,9 +106,16 @@ def create_population_chart(countries):
     plt.xlabel("Population (Millions)")
     plt.ylabel("Country")
     plt.title("10 Most Populous Countries in the Dataset")
+
+    chart_filename = "top_10_population.png"
+
     plt.tight_layout()
-    plt.savefig("top_10_population.png")
+    plt.savefig(chart_filename)
     plt.show()
+
+    return chart_filename
+
+
 
 #Print Country Explorer Menu
 def show_menu():
@@ -226,7 +236,9 @@ def main():
                     print(f"{country['name']} | Currencies: {currencies_display}")            
 
         elif result == "4":
-            create_population_chart(cleaned_countries)
+            top_10_countries = get_top_10_population(cleaned_countries)
+            chart_filename = create_population_chart(top_10_countries)
+            print(f"Chart saved ast {chart_filename}")
 
         elif result == "5":
             quit_loop()
