@@ -22,13 +22,17 @@ def fetch_data():
 
 def process_data(records):
     """Extract and transform the fields you need. Returns a list of dictionaries."""
+    country_code_dict = {record.get("codes", {}).get("alpha_3"):
+                        record.get("names", {}).get("common","Unknown")
+                        for record in records}
     result = []
     for record in records:
         result.append({
             "name": record.get("names", {}).get("common","Unknown"),
             "region": record.get("region", "Unknown"),
-            "languages": [lang["name"] for lang in record.get("languages", [])],
-            "borders": record.get("borders", "Unknown") or "None",
+            "languages": ", ".join([lang["name"] for lang in record.get("languages", [])]),
+            "borders": ", ".join(country_code_dict.get(code,code)
+                for code in record.get("borders", [])) or "None",
             "code": record.get("codes", {}).get("alpha_3", "Unknown") or "None",
         })
     return result
@@ -36,7 +40,13 @@ def process_data(records):
 
 def display_results(results):
     """Print results to the terminal in a readable format."""
-    pass
+    for result in results:
+        print(f"\nCountry: {result["name"]}"
+            f"\nCountry Code: {result["code"]}"
+            f"\nRegion: {result["region"]}"
+            f"\nBorders: {result["borders"]}"
+            f"\nOfficial Languages: {result["languages"]}"
+              )
 
 
 def main():
@@ -46,8 +56,7 @@ def main():
         print("No data returned.")
         return
     print(f"Fetched {len(records)} records.")
-    print(records[0]) 
-    #display_results(records)
+    display_results(records)
 
 
 if __name__ == "__main__":
