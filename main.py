@@ -1,22 +1,35 @@
 import requests
+import os
 
-API_URL = "https://your-api-url-here.com"  # Replace with your chosen API endpoint
 
+API_URL = "https://api.restcountries.com/countries/v5"  # Replace with your chosen API endpoint
 
 def fetch_data():
     """Fetch data from the API. Returns the raw JSON response, or an empty list on failure."""
+    API_KEY = os.environ.get("REST_COUNTRIES_API_KEY")
+    if not API_KEY:
+        print("No API key found. Set REST_COUNTRIES_API_KEY and try again.")
+
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+
     try:
-        response = requests.get(API_URL)
+        response = requests.get(API_URL, headers=headers)
         response.raise_for_status()
-        return response.json()
+        return response.json()["data"]["objects"]
     except requests.exceptions.RequestException as e:
-        print(f"Error: could not fetch data. {e}")
+        print(f"Error could not fetch data: {e}")
         return []
 
-
-def process_data(data):
+def process_data(records):
     """Extract and transform the fields you need. Returns a list of dictionaries."""
-    pass
+    result = []
+    for record in records:
+        result.append({
+            "name": record.get("names", {}).get("common","Unknown"),
+            "population": record.get("population",0),
+            "region": record.get("region", "Unknown"),
+        })
+    return result
 
 
 def display_results(results):
@@ -26,11 +39,13 @@ def display_results(results):
 
 def main():
     data = fetch_data()
-    if not data:
-        return
-
     records = process_data(data)
-    display_results(records)
+    if not records:
+        print("No data returned.")
+        return
+    print(f"Fetched {len(records)} records.")
+    print(records[0]) 
+    #display_results(records)
 
 
 if __name__ == "__main__":
