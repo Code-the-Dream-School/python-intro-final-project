@@ -26,8 +26,10 @@ def process_data(records):
     for record in records:
         result.append({
             "name": record.get("names", {}).get("common","Unknown"),
-            "population": record.get("population",0),
             "region": record.get("region", "Unknown"),
+            "languages": [lang["name"] for lang in record.get("languages", [])],
+            "borders": record.get("borders", "Unknown") or "None",
+            "code": record.get("codes", {}).get("alpha_3", "Unknown") or "None",
         })
     return result
 
