@@ -32,8 +32,8 @@ def process_data(records):
             "name": record.get("names", {}).get("common","Unknown"),
             "region": record.get("region", "Unknown"),
             "languages": [lang["name"] for lang in record.get("languages", [])],
-            "borders": (country_code_dict.get(code,code)
-                for code in record.get("borders", [])) or "None",
+            "borders": [country_code_dict.get(code,code)
+                for code in record.get("borders", [])] or "None",
             "code": record.get("codes", {}).get("alpha_3", "Unknown") or "None",
         })
     return results
