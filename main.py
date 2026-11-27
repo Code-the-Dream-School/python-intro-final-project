@@ -42,47 +42,40 @@ def language_set(results):
     return sorted({language.title() for record in results
                          for language in record["languages"]})
 
-def display_by_language(results):
-    while True:
-        language = input(f"Filter countries by language. Available languages: {", ".join(language_set(results))}"
-                     "\nChoose an available language: ").title()
-        if language in (language_set(results)):
-            print(f"\nCountries where {language} is spoken:")
-            for country in results:
-                if language in country["languages"]:
-                    print(f"{country["name"]}"
-                        f"\n\tRegion: {country["region"]}"
-                        f"\n\tBorders: {", ".join(country["borders"])}"
-                        f"\n\tOfficial Languages: {", ".join(country["languages"])}")
-            return
-        else:
-            print(f"\nNot an available language. Try again.\n")
-
-def display_all_data(results):
-    """Print results to the terminal in a readable format."""
-    if not results:
-        print("No results found.")
-        return
-    for result in results:
-        print(f"\nCountry: {result["name"]}"
-            f"\nCountry Code: {result["code"]}"
-            f"\nRegion: {result["region"]}"
-            f"\nBorders: {result["borders"]}"
-            f"\nOfficial Languages: {result["languages"]}"
-              )
-
+def display_by_language(results, language):
+    print(f"\nCountries where {language} is spoken:")
+    for country in results:
+        if language in country["languages"]:
+            print(f"{country["name"]}"
+                f"\n\tRegion: {country["region"]}"
+                f"\n\tBorders: {", ".join(country["borders"])}"
+                f"\n\tOfficial Languages: {", ".join(country["languages"])}")
+            
 def main():    
     data = fetch_data()
-    if not data:
-        return
-    
     results = process_data(data)
     if not results:
         print("No data returned.")
         return
+    else:
+        print(f"Fetched {len(results)} records.")
+    
+    parser = argparse.ArgumentParser(description="Query country data by language.")
+    parser.add_argument("language", type=str.title, choices=language_set(results), help=f"Choose a language.")
+    args = parser.parse_args()
 
-    print(f"Fetched {len(results)} records.")
-    display_by_language(results)
+    display_by_language(results, args.language)
 
+    # while True:
+    #     language = input(f"Filter countries by language. Available languages: {", ".join(language_set(results))}"
+    #                      "\nChoose an available language: ").title()
+    #     if not language:
+    #         print(f"\nPlease enter a value.\n")
+    #     elif language in (language_set(results)):
+    #         display_by_language(results, language)
+    #         return
+    #     else:
+    #         print(f"\nNot an available language. Try again.\n")
+             
 if __name__ == "__main__":
     main()
