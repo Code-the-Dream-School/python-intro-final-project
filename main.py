@@ -1,5 +1,6 @@
 import requests
 import os
+import argparse
 
 
 API_URL = "https://api.restcountries.com/countries/v5"  # Replace with your chosen API endpoint
@@ -25,21 +26,43 @@ def process_data(records):
     country_code_dict = {record.get("codes", {}).get("alpha_3"):
                         record.get("names", {}).get("common","Unknown")
                         for record in records}
-    result = []
+    results = []
     for record in records:
-        result.append({
+        results.append({
             "name": record.get("names", {}).get("common","Unknown"),
             "region": record.get("region", "Unknown"),
-            "languages": ", ".join([lang["name"] for lang in record.get("languages", [])]),
-            "borders": ", ".join(country_code_dict.get(code,code)
+            "languages": [lang["name"] for lang in record.get("languages", [])],
+            "borders": (country_code_dict.get(code,code)
                 for code in record.get("borders", [])) or "None",
             "code": record.get("codes", {}).get("alpha_3", "Unknown") or "None",
         })
-    return result
+    return results
 
+def language_set(results):
+    return sorted({language.title() for record in results
+                         for language in record["languages"]})
 
-def display_results(results):
+def display_by_language(results):
+    while True:
+        language = input(f"Filter countries by language. Available languages: {", ".join(language_set(results))}"
+                     "\nChoose an available language: ").title()
+        if language in (language_set(results)):
+            print(f"\nCountries where {language} is spoken:")
+            for country in results:
+                if language in country["languages"]:
+                    print(f"{country["name"]}"
+                        f"\n\tRegion: {country["region"]}"
+                        f"\n\tBorders: {", ".join(country["borders"])}"
+                        f"\n\tOfficial Languages: {", ".join(country["languages"])}")
+            return
+        else:
+            print(f"\nNot an available language. Try again.\n")
+
+def display_all_data(results):
     """Print results to the terminal in a readable format."""
+    if not results:
+        print("No results found.")
+        return
     for result in results:
         print(f"\nCountry: {result["name"]}"
             f"\nCountry Code: {result["code"]}"
@@ -48,16 +71,18 @@ def display_results(results):
             f"\nOfficial Languages: {result["languages"]}"
               )
 
-
-def main():
+def main():    
     data = fetch_data()
-    records = process_data(data)
-    if not records:
+    if not data:
+        return
+    
+    results = process_data(data)
+    if not results:
         print("No data returned.")
         return
-    print(f"Fetched {len(records)} records.")
-    display_results(records)
 
+    print(f"Fetched {len(results)} records.")
+    display_by_language(results)
 
 if __name__ == "__main__":
     main()
